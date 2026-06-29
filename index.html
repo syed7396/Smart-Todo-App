@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartTask — To-Do & Notes</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f0f4ff;
+            --white: #ffffff;
+            --primary: #4f46e5;
+            --primary-light: #e0e7ff;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --danger: #ef4444;
+            --warn: #f59e0b;
+            --warn-light: #fef3c7;
+            --text: #1e1b4b;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --shadow: 0 4px 20px rgba(79, 70, 229, 0.08);
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        header {
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: var(--shadow);
+        }
+
+        .brand {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .storage-badge {
+            background: var(--success-light);
+            color: var(--success);
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.25rem 0.7rem;
+            border-radius: 20px;
+        }
+
+        .stats-header {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-item .num {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+
+        .stat-item .lbl {
+            font-size: 0.7rem;
+            color: var(--muted);
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid var(--border);
+            background: var(--white);
+            padding: 0 2rem;
+        }
+
+        .tab {
+            padding: 0.9rem 1.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--muted);
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* MAIN */
+        main {
+            max-width: 760px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* ADD FORM */
+        .add-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .add-card h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .main-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .main-input:focus {
+            border-color: var(--primary);
+        }
+
+        .add-options {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        select {
+            padding: 0.5rem 0.8rem;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.83rem;
+            outline: none;
+            cursor: pointer;
+            background: var(--white);
+            color: var(--text);
+        }
+
+        select:focus {
+            border-color: var(--primary);
+        }
+
+        .add-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 1.4rem;
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .add-btn:hover {
+            background: #3730a3;
+            transform: translateY(-1px);
+        }
+
+        /* FILTERS BAR */
+        .filter-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.2rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-btn {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1.5px solid var(--border);
+            background: var(--white);
+            color: var(--muted);
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .search-wrap {
+            margin-left: auto;
+            position: relative;
+        }
+
+        .search-wrap input {
+            padding: 0.4rem 0.9rem 0.4rem 2rem;
+            border: 1.5px solid var(--border);
+            border-radius: 20px;
+            font-size: 0.82rem;
+            outline: none;
+        }
+
+        .search-wrap::before {
+            content: '🔍';
+            position: absolute;
+            left: 0.55rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.75rem;
+        }
+
+        /* ITEMS */
+        #items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .item-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1rem 1.2rem;
+            border: 1.5px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.9rem;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            animation: slideIn 0.25s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .item-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .item-card.done {
+            opacity: 0.55;
+        }
+
+        .item-card.done .item-text {
+            text-decoration: line-through;
+            color: var(--muted);
+        }
+
+        .check-btn {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            flex-shrink: 0;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            background: transparent;
+        }
+
+        .check-btn.checked {
+            background: var(--success);
+            border-color: var(--success);
+            color: #fff;
+        }
+
+        .item-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .item-text {
+            font-size: 0.92rem;
+            font-weight: 500;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .item-meta {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.4rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .priority-badge {
+            font-size: 0.68rem;
+            font-weight: 600;
+            padding: 0.15rem 0.55rem;
+            border-radius: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .p-high {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        .p-medium {
+            background: var(--warn-light);
+            color: var(--warn);
+        }
+
+        .p-low {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .cat-badge {
+            font-size: 0.68rem;
+            padding: 0.15rem 0.55rem;
+            border-radius: 10px;
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .item-date {
+            font-size: 0.68rem;
+            color: var(--muted);
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 0.4rem;
+            flex-shrink: 0;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0.25rem;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: var(--bg);
+        }
+
+        .delete-btn:hover {
+            background: #fee2e2;
+        }
+
+        /* NOTES TAB */
+        #notes-panel {
+            display: none;
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .note-card {
+            border-radius: 12px;
+            padding: 1.2rem;
+            border: 1.5px solid transparent;
+            position: relative;
+            cursor: default;
+            min-height: 140px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            animation: slideIn 0.25s ease;
+        }
+
+        .note-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .note-card h4 {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 0.92rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .note-card p {
+            font-size: 0.82rem;
+            line-height: 1.55;
+            opacity: 0.85;
+        }
+
+        .note-del {
+            position: absolute;
+            top: 0.6rem;
+            right: 0.6rem;
+            background: rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .note-card:hover .note-del {
+            opacity: 1;
+        }
+
+        .note-date {
+            font-size: 0.67rem;
+            margin-top: 0.8rem;
+            opacity: 0.6;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--muted);
+        }
+
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            font-size: 0.9rem;
+        }
+
+        /* NOTE COLORS */
+        .nc-0 {
+            background: #fef9c3;
+        }
+
+        .nc-1 {
+            background: #d1fae5;
+        }
+
+        .nc-2 {
+            background: #dbeafe;
+        }
+
+        .nc-3 {
+            background: #fce7f3;
+        }
+
+        .nc-4 {
+            background: #ede9fe;
+        }
+
+        .nc-5 {
+            background: #ffedd5;
+        }
+
+        /* PROGRESS */
+        .progress-wrap {
+            margin-bottom: 1.5rem;
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1rem 1.2rem;
+            border: 1px solid var(--border);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            border-radius: 4px;
+            transition: width 0.4s ease;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div style="display:flex;align-items:center;gap:0.8rem">
+            <div class="brand">📋 SmartTask</div>
+            <span class="storage-badge">💾 localStorage</span>
+        </div>
+        <div class="stats-header">
+            <div class="stat-item">
+                <div class="num" id="total-count">0</div>
+                <div class="lbl">Total</div>
+            </div>
+            <div class="stat-item">
+                <div class="num" id="done-count">0</div>
+                <div class="lbl">Done</div>
+            </div>
+            <div class="stat-item">
+                <div class="num" id="notes-count">0</div>
+                <div class="lbl">Notes</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('tasks')">✅ Tasks</div>
+        <div class="tab" onclick="switchTab('notes')">📝 Notes</div>
+    </div>
+
+    <main>
+
+        <!-- TASKS PANEL -->
+        <div id="tasks-panel">
+            <div class="add-card">
+                <h3>Add New Task</h3>
+                <div class="input-row">
+                    <input class="main-input" id="task-input" placeholder="What needs to be done?"
+                        onkeydown="if(event.key==='Enter')addTask()">
+                    <button class="add-btn" onclick="addTask()">+ Add</button>
+                </div>
+                <div class="add-options">
+                    <select id="task-priority">
+                        <option value="medium">🟡 Medium</option>
+                        <option value="high">🔴 High</option>
+                        <option value="low">🟢 Low</option>
+                    </select>
+                    <select id="task-cat">
+                        <option value="General">General</option>
+                        <option value="Work">Work</option>
+                        <option value="Study">Study</option>
+                        <option value="Personal">Personal</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="progress-wrap" id="progress-wrap" style="display:none">
+                <div class="progress-header">
+                    <span>Progress</span><span id="progress-text">0 / 0 done</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+                <button class="filter-btn" onclick="setFilter('active',this)">Active</button>
+                <button class="filter-btn" onclick="setFilter('done',this)">Done</button>
+                <button class="filter-btn" onclick="setFilter('high',this)">🔴 High</button>
+                <div class="search-wrap"><input id="search-input" placeholder="Search…" oninput="renderTasks()"></div>
+            </div>
+
+            <div id="items-list"></div>
+        </div>
+
+        <!-- NOTES PANEL -->
+        <div id="notes-panel">
+            <div class="add-card">
+                <h3>New Note</h3>
+                <input class="main-input" id="note-title" placeholder="Title…" style="margin-bottom:0.6rem;width:100%">
+                <textarea class="main-input" id="note-body" placeholder="Write your note…"
+                    style="width:100%;min-height:80px;resize:vertical"></textarea>
+                <button class="add-btn" style="margin-top:0.6rem" onclick="addNote()">+ Save Note</button>
+            </div>
+            <div class="notes-grid" id="notes-grid"></div>
+        </div>
+    </main>
+
+    <script>
+        let tasks = JSON.parse(localStorage.getItem('smarttask_tasks') || '[]');
+        let notes = JSON.parse(localStorage.getItem('smarttask_notes') || '[]');
+        let currentFilter = 'all';
+        let activeTab = 'tasks';
+
+        function save() {
+            localStorage.setItem('smarttask_tasks', JSON.stringify(tasks));
+            localStorage.setItem('smarttask_notes', JSON.stringify(notes));
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('total-count').textContent = tasks.length;
+            document.getElementById('done-count').textContent = tasks.filter(t => t.done).length;
+            document.getElementById('notes-count').textContent = notes.length;
+            const pw = document.getElementById('progress-wrap');
+            if (tasks.length) {
+                pw.style.display = 'block';
+                const pct = Math.round((tasks.filter(t => t.done).length / tasks.length) * 100);
+                document.getElementById('progress-fill').style.width = pct + '%';
+                document.getElementById('progress-text').textContent = `${tasks.filter(t => t.done).length} / ${tasks.length} done`;
+            } else { pw.style.display = 'none'; }
+        }
+
+        function addTask() {
+            const val = document.getElementById('task-input').value.trim();
+            if (!val) return;
+            tasks.unshift({
+                id: Date.now(), text: val,
+                priority: document.getElementById('task-priority').value,
+                category: document.getElementById('task-cat').value,
+                done: false, date: new Date().toLocaleDateString()
+            });
+            document.getElementById('task-input').value = '';
+            save(); renderTasks();
+        }
+
+        function toggleTask(id) {
+            const t = tasks.find(t => t.id === id);
+            if (t) { t.done = !t.done; save(); renderTasks(); }
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            save(); renderTasks();
+        }
+
+        function setFilter(f, el) {
+            currentFilter = f;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const q = document.getElementById('search-input').value.toLowerCase();
+            let filtered = tasks.filter(t => {
+                if (currentFilter === 'active') return !t.done;
+                if (currentFilter === 'done') return t.done;
+                if (currentFilter === 'high') return t.priority === 'high';
+                return true;
+            }).filter(t => t.text.toLowerCase().includes(q));
+
+            const list = document.getElementById('items-list');
+            if (!filtered.length) {
+                list.innerHTML = '<div class="empty-state"><div class="icon">🎉</div><p>No tasks here. Add one above!</p></div>';
+                return;
+            }
+            list.innerHTML = filtered.map(t => `
+    <div class="item-card ${t.done ? 'done' : ''}" id="item-${t.id}">
+      <button class="check-btn ${t.done ? 'checked' : ''}" onclick="toggleTask(${t.id})">${t.done ? '✓' : ''}</button>
+      <div class="item-body">
+        <div class="item-text">${escHtml(t.text)}</div>
+        <div class="item-meta">
+          <span class="priority-badge p-${t.priority}">${t.priority}</span>
+          <span class="cat-badge">${t.category}</span>
+          <span class="item-date">${t.date}</span>
+        </div>
+      </div>
+      <div class="item-actions">
+        <button class="icon-btn delete-btn" onclick="deleteTask(${t.id})" title="Delete">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+        }
+
+        /* NOTES */
+        const NOTE_COLORS = ['nc-0', 'nc-1', 'nc-2', 'nc-3', 'nc-4', 'nc-5'];
+        function addNote() {
+            const title = document.getElementById('note-title').value.trim();
+            const body = document.getElementById('note-body').value.trim();
+            if (!title && !body) return;
+            notes.unshift({ id: Date.now(), title: title || 'Untitled', body, color: NOTE_COLORS[notes.length % NOTE_COLORS.length], date: new Date().toLocaleDateString() });
+            document.getElementById('note-title').value = '';
+            document.getElementById('note-body').value = '';
+            save(); renderNotes();
+        }
+
+        function deleteNote(id) {
+            notes = notes.filter(n => n.id !== id); save(); renderNotes();
+        }
+
+        function renderNotes() {
+            const grid = document.getElementById('notes-grid');
+            if (!notes.length) {
+                grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">📝</div><p>No notes yet. Write something!</p></div>';
+                return;
+            }
+            grid.innerHTML = notes.map(n => `
+    <div class="note-card ${n.color}">
+      <button class="note-del" onclick="deleteNote(${n.id})">✕</button>
+      <h4>${escHtml(n.title)}</h4>
+      <p>${escHtml(n.body)}</p>
+      <div class="note-date">${n.date}</div>
+    </div>
+  `).join('');
+        }
+
+        function switchTab(tab) {
+            activeTab = tab;
+            document.getElementById('tasks-panel').style.display = tab === 'tasks' ? 'block' : 'none';
+            document.getElementById('notes-panel').style.display = tab === 'notes' ? 'block' : 'none';
+            document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', (i === 0 && tab === 'tasks') || (i === 1 && tab === 'notes')));
+        }
+
+        function escHtml(s) {
+            return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        // Init
+        renderTasks(); renderNotes(); updateStats();
+    </script>
+</body>
+
+</html>
